@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -13,9 +12,9 @@ func LogError(message string, err error) {
 }
 
 // LogInfo 记录信息日志
-func LogInfo(message string) {
+func LogInfo(message string, a ...any) {
 	log.Println("INFO: ", message)
-	fmt.Println("fmt INFO: ", message)
+	log.Printf("INFO: %s - %v", message, a)
 }
 
 func Timestamp() int64 {

@@ -10,12 +10,14 @@ import (
 	"time"
 )
 
+var mouseDrag = false
+var enable = false
+
 var selectionCallback func(string)
 
 // InitGlobalHotkeys 初始化全局热键和划词检测
 func InitGlobalHotkeys() error {
-	// 可以在这里设置一些全局热键，如果需要的话
-	// 例如：robot.RegisterHotKey("ctrl", "alt", "c", func() { log.Println("Hotkey pressed!") })
+	utils.LogInfo("InitGlobalHotkey")
 
 	// 开启一个协程用于监控鼠标事件
 	go monitorMouseEvents()
@@ -25,22 +27,41 @@ func InitGlobalHotkeys() error {
 
 // RegisterSelectionCallback 注册划词检测回调函数
 func RegisterSelectionCallback(callback func(string)) {
+	utils.LogInfo("注册划词检测回调")
 	selectionCallback = callback
 }
 
-var mouseDrag = false
-var enable = false
+func Toggle() bool {
+	enable = !enable
+	utils.LogInfo(fmt.Sprintf("搜索状态：%v", enable))
+	return enable
+}
+
+func Enable() bool {
+	return enable
+}
+
+func MenuTitle() string {
+	title := "开启划词"
+	if enable {
+		title = "关闭划词"
+	}
+	return title
+}
 
 // monitorMouseEvents 监控鼠标事件以检测划词操作
 func monitorMouseEvents() {
+	utils.LogInfo("monitorMouseEvents")
+
 	hook.Register(hook.MouseDown, []string{}, func(e hook.Event) {
 		if !enable {
 			return
 		}
+		utils.LogInfo("MouseDown", enable, e)
+
 		if e.Button != 1 {
 			return
 		}
-		utils.LogInfo("MouseDown")
 		utils.LogInfo(e.String())
 		if (e.Clicks == 1 || e.Clicks == 0) && mouseDrag {
 			mouseDrag = false
@@ -52,66 +73,17 @@ func monitorMouseEvents() {
 	})
 
 	hook.Register(hook.MouseDrag, []string{}, func(e hook.Event) {
+		//utils.LogInfo("MouseDrag")
 		if !enable {
 			return
 		}
 		mouseDrag = true
 	})
 
-	//hook.Register(hook.KeyDown, []string{"q", "ctrl", "alt"}, func(e hook.Event) {
-	//	enable = !enable
-	//	utils.LogInfo(fmt.Sprintf("搜索状态：%v", enable))
-	//})
-
-	hook.Register(hook.KeyDown, []string{}, func(e hook.Event) {
-		utils.LogInfo(fmt.Sprintf("e：%v", e))
-	})
-	//hook.Register(hook.MouseMove, []string{}, func(e hook.Event) {
-	//	//utils.LogInfo("MouseMove")
-	//	executed = true
-	//})
-	//
-	//hook.Register(hook.MouseUp, []string{}, func(e hook.Event) {
-	//	utils.LogInfo("MouseUp")
-	//	executed = true
-	//	//executeCallback()
-	//
-	//	//hook.End()
-	//})
-
+	utils.LogInfo("hook.Start")
 	s := hook.Start()
 	<-hook.Process(s)
-	//
-	//for {
-	//	mleft := hook.AddEvent("mleft")
-	//	if mleft {
-	//		utils.LogInfo("Mouse left button pressed")
-	//	}
-	//
-	//	//err := robot.KeyTap("c", "ctrl")
-	//	//if err != nil {
-	//	//	utils.LogError("copy text Error", err)
-	//	//	return
-	//	//}
-	//	//
-	//	//clipboardText, err := clipboard.ReadAll()
-	//	//if err != nil {
-	//	//	utils.LogError("clipboard  ReadAll Error", err)
-	//	//	return
-	//	//}
-	//	//selectionCallback(clipboardText)
-	//	//
-	//	//	// 获取选中的文本
-	//	//selectedText := robot.GetSelection()
-	//	//log.Printf("Selected text: %s", selectedText)
-	//	//
-	//	//	// 触发回调函数
-	//	//if selectionCallback != nil && selectedText != "" {
-	//	//	selectionCallback(selectedText)
-	//	//}
-	//	//}
-	//	time.Sleep(100 * time.Millisecond) // 防止CPU占用过高
-	//}
+	utils.LogInfo("hook.Process")
 }
 
 // monitorMouseEvents 监控鼠标事件以检测划词操作

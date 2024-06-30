@@ -4,6 +4,7 @@ export namespace config {
 	    api_key: string;
 	    base_url: string;
 	    api_version: string;
+	    model: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new OpenAI(source);
@@ -14,6 +15,7 @@ export namespace config {
 	        this.api_key = source["api_key"];
 	        this.base_url = source["base_url"];
 	        this.api_version = source["api_version"];
+	        this.model = source["model"];
 	    }
 	}
 	export class GuiConfig {

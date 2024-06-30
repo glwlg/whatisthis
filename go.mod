@@ -6,6 +6,7 @@ toolchain go1.22.4
 
 require (
 	github.com/atotto/clipboard v0.1.4
+	github.com/energye/systray v1.0.2
 	github.com/go-vgo/robotgo v0.110.1
 	github.com/robotn/gohook v0.41.0
 	github.com/sashabaranov/go-openai v1.26.1
@@ -54,6 +55,7 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/tevino/abool v0.0.0-20220530134649-2bfc934cb23c // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect

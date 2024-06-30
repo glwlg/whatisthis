@@ -6,10 +6,10 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
-export function Greet() {
-  return window['go']['main']['App']['Greet']();
-}
-
 export function SetConfig(arg1) {
   return window['go']['main']['App']['SetConfig'](arg1);
+}
+
+export function WriteToClipboard(arg1) {
+  return window['go']['main']['App']['WriteToClipboard'](arg1);
 }

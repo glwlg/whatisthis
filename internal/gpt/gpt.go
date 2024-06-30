@@ -9,6 +9,7 @@ import (
 
 type Gpt struct {
 	client         *openai.Client
+	model          string
 	promptTemplate string
 	mock           bool
 }
@@ -22,6 +23,7 @@ func NewClient(cfg config.Config, gCfg *config.GuiConfig) *Gpt {
 
 	return &Gpt{
 		client:         client,
+		model:          gCfg.OpenAI.Model,
 		promptTemplate: cfg.Search.PromptTemplates[0],
 		mock:           cfg.AppConfig.Mock,
 	}
@@ -34,7 +36,7 @@ func (g *Gpt) Search(msg string) (string, error) {
 	resp, err := g.client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: openai.GPT4o,
+			Model: g.model,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleSystem,

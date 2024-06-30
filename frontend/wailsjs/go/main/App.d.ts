@@ -4,6 +4,6 @@ import {config} from '../models';
 
 export function GetConfig():Promise<config.GuiConfig>;
 
-export function Greet():Promise<string>;
-
 export function SetConfig(arg1:config.GuiConfig):Promise<void>;
+
+export function WriteToClipboard(arg1:string):Promise<void>;

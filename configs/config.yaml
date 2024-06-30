@@ -1,5 +1,5 @@
 app_config:
-  mock: true
+  mock: false
 hotkey: "your-key-here"
 ocr:
   language: "en"

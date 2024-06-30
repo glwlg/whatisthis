@@ -45,6 +45,7 @@ type OpenAI struct {
 	APIKey     string `json:"api_key"`
 	BaseUrl    string `json:"base_url"`
 	ApiVersion string `json:"api_version"`
+	Model      string `json:"model"`
 }
 
 type GuiConfig struct {

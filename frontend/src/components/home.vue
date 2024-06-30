@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <v-main>
+    <v-main style="--wails-draggable: drag">
       <v-container>
         <!-- 判断data中的字段是否有值，如果没有则显示表单 -->
-        <v-form v-if="!isConfigured" v-model="valid" ref="form" lazy-validation>
+        <v-form v-if="showSetting" v-model="valid" ref="form" lazy-validation>
           <v-text-field
               v-model="openai.api_key"
               :rules="apiKeyRules"
@@ -17,6 +17,12 @@
               required
           ></v-text-field>
           <v-text-field
+              v-model="openai.model"
+              :rules="modelRules"
+              label="模型"
+              required
+          ></v-text-field>
+          <v-text-field
               v-model="openai.api_version"
               :rules="apiVersionRules"
               label="API Version"
@@ -25,7 +31,10 @@
           <v-btn @click="submit">Submit</v-btn>
         </v-form>
         <div v-else>
-          <div id="result" class="result">{{ data.resultText }}</div>
+          <div v-if="data.resultText">
+            <div id="result" class="result">{{ data.resultText }}</div>
+            <v-btn @click="copy">copy</v-btn>
+          </div>
         </div>
       </v-container>
     </v-main>
@@ -33,26 +42,32 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref, watch} from 'vue';
-import {GetConfig, SetConfig} from "../../wailsjs/go/main/App.js";
+import {onMounted, reactive, ref} from 'vue';
+import {GetConfig, SetConfig, WriteToClipboard} from "../../wailsjs/go/main/App.js";
+import {EventsOn} from "../../wailsjs/runtime/runtime.js";
 
 const data = reactive({
   resultText: "",
 })
 
 const valid = ref(false);
-const openai = ref({api_key: '', base_url: '', api_version: ''});
+const openai = ref({api_key: '', base_url: '', model: '', api_version: ''});
 const apiKeyRules = [v => !!v || 'API Key is required'];
 const baseUrlRules = [v => !!v || 'Base URL is required'];
 const apiVersionRules = [v => !!v || 'API Version is required'];
+const modelRules = [v => !!v || 'Model is required'];
 
-const isConfigured = ref(false);
+const showSetting = ref(true);
 
 const submit = () => {
-  if (valid.value && openai.value.api_key && openai.value.base_url && openai.value.api_version) {
-    isConfigured.value = true;
+  if (valid.value && openai.value.api_key && openai.value.base_url && openai.value.model && openai.value.api_version) {
+    showSetting.value = false;
     SetConfig({openai: openai.value})
   }
+};
+
+const copy = () => {
+  WriteToClipboard(data.resultText)
 };
 
 onMounted(() => {
@@ -60,11 +75,21 @@ onMounted(() => {
     console.log(config);
     if (config.openai) {
       openai.value = config.openai;
-      isConfigured.value = true;
+      showSetting.value = false;
     }
   });
 
 });
+
+
+EventsOn("onSearchResult", function (resultText) {
+  data.resultText = resultText
+})
+
+EventsOn("openSetting", function () {
+  showSetting.value = true;
+})
+
 
 
 </script>

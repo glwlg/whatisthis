@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"github.com/energye/systray"
 	"github.com/glwlg/whatisthis/internal/config"
 	"github.com/glwlg/whatisthis/internal/gpt"
 	"github.com/glwlg/whatisthis/internal/storage/nosql"
 	"github.com/glwlg/whatisthis/internal/utils"
 	"github.com/glwlg/whatisthis/pkg/robot"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"io"
+	"os"
 )
 
 // App struct
@@ -39,22 +43,53 @@ func NewApp() *App {
 		storage: *storage,
 	}
 
-	//utils.LogInfo(cfg.OpenAI.BaseUrl)
+	return a
+}
 
-	//// 初始化全局热键和划词检测
-	err = robot.InitGlobalHotkeys()
+func (a *App) systemTray() {
+	file, err := os.Open("./icon.ico")
 	if err != nil {
-		utils.LogError("无法初始化全局热键:", err)
+		panic(err)
+	}
+	defer file.Close()
+
+	// 创建一个缓冲区读取器
+	reader := bufio.NewReader(file)
+
+	// 读取整个文件到 byte 数组
+	icoByte, err := io.ReadAll(reader)
+	if err != nil {
+		panic(err)
 	}
 
-	return a
+	systray.SetIcon(icoByte) // read the icon from a file
+
+	show := systray.AddMenuItem("打开", "打开面板")
+	toggle := systray.AddMenuItem(robot.MenuTitle(), "开启/关闭划词")
+	settings := systray.AddMenuItem("修改配置", "修改配置")
+	systray.AddSeparator()
+	exit := systray.AddMenuItem("退出", "退出")
+
+	show.Click(func() { runtime.WindowShow(a.ctx) })
+	toggle.Click(func() {
+		robot.Toggle()
+		runtime.EventsEmit(a.ctx, "robotMenuClick")
+	})
+	settings.Click(func() { runtime.EventsEmit(a.ctx, "openSetting") })
+	exit.Click(func() { os.Exit(0) })
+
+	runtime.EventsOn(a.ctx, "robotMenuClick", func(optionalData ...interface{}) {
+		toggle.SetTitle(robot.MenuTitle())
+	})
+
+	systray.SetOnClick(func(menu systray.IMenu) { runtime.WindowShow(a.ctx) })
+	systray.SetOnRClick(func(menu systray.IMenu) { menu.ShowMenu() })
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.hideWindow()
 
 	guiConfig, err := a.storage.GetGuiConfig()
 	if err != nil {
@@ -66,14 +101,20 @@ func (a *App) startup(ctx context.Context) {
 		gptClient = gpt.NewClient(a.cfg, guiConfig)
 	}
 
+	//// 初始化全局热键和划词检测
+	err = robot.InitGlobalHotkeys()
+	if err != nil {
+		utils.LogError("无法初始化全局热键:", err)
+	}
+
 	//// 注册划词检测回调
 	robot.RegisterSelectionCallback(func(selectedText string) {
-		utils.LogInfo("注册划词检测回调")
 
 		if selectedText == lastSearchText || utils.IsBlankOrSpaces(selectedText) {
 			utils.LogInfo("未选择文本")
 			return
 		}
+		lastSearchText = selectedText
 
 		result, err := gptClient.Search(selectedText)
 		if err != nil {
@@ -88,19 +129,20 @@ func (a *App) startup(ctx context.Context) {
 		a.showWindow()
 
 	})
-}
 
-// Greet returns a greeting for the given name
-func (a *App) Greet() string {
-	return resultText
+	systray.Run(a.systemTray, func() {})
+	a.hideWindow()
+
 }
 
 func (a *App) hideWindow() {
 	utils.LogInfo("hideWindow")
-	runtime.Hide(a.ctx)
+	//runtime.Hide(a.ctx)
+	runtime.WindowMinimise(a.ctx)
 }
 
 func (a *App) showWindow() {
+	runtime.WindowUnminimise(a.ctx)
 	runtime.Show(a.ctx)
 }
 
@@ -126,8 +168,11 @@ func (a *App) GetConfig() *config.GuiConfig {
 	if err != nil {
 		utils.LogError("获取Gui配置失败: %v", err)
 	}
-	a.hideWindow()
 	return guiConfig
+}
+
+func (a *App) WriteToClipboard(text string) error {
+	return robot.WriteToClipboard(text)
 }
 
 //// Greet returns a greeting for the given name
