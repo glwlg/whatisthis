@@ -20,6 +20,7 @@ export namespace config {
 	}
 	export class GuiConfig {
 	    openai: OpenAI;
+	    delay: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new GuiConfig(source);
@@ -28,6 +29,7 @@ export namespace config {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.openai = this.convertValues(source["openai"], OpenAI);
+	        this.delay = source["delay"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

@@ -16,8 +16,10 @@ type Gpt struct {
 
 func NewClient(cfg config.Config, gCfg *config.GuiConfig) *Gpt {
 
-	clientConfig := openai.DefaultAzureConfig(gCfg.OpenAI.APIKey, gCfg.OpenAI.BaseUrl)
-	clientConfig.APIVersion = gCfg.OpenAI.ApiVersion
+	//clientConfig := openai.DefaultAzureConfig(gCfg.OpenAI.APIKey, gCfg.OpenAI.BaseUrl)
+	clientConfig := openai.DefaultConfig(gCfg.OpenAI.APIKey)
+	clientConfig.BaseURL = gCfg.OpenAI.BaseUrl
+	//clientConfig.APIVersion = gCfg.OpenAI.ApiVersion
 
 	client := openai.NewClientWithConfig(clientConfig)
 

@@ -5,13 +5,13 @@ go 1.22
 toolchain go1.22.4
 
 require (
-	github.com/atotto/clipboard v0.1.4
 	github.com/energye/systray v1.0.2
 	github.com/go-vgo/robotgo v0.110.1
 	github.com/robotn/gohook v0.41.0
 	github.com/sashabaranov/go-openai v1.26.1
 	github.com/spf13/viper v1.19.0
-	github.com/wailsapp/wails/v2 v2.9.1
+	github.com/wailsapp/wails/v2 v2.9.2
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -65,7 +65,7 @@ require (
 	github.com/vcaesar/imgo v0.40.0 // indirect
 	github.com/vcaesar/keycode v0.10.1 // indirect
 	github.com/vcaesar/tt v0.20.0 // indirect
-	github.com/wailsapp/go-webview2 v1.0.10 // indirect
+	github.com/wailsapp/go-webview2 v1.0.16 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

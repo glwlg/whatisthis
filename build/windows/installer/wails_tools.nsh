@@ -8,7 +8,7 @@
     !define INFO_PROJECTNAME "whatisthis"
 !endif
 !ifndef INFO_COMPANYNAME
-    !define INFO_COMPANYNAME "whatisthis"
+    !define INFO_COMPANYNAME "guoluwei"
 !endif
 !ifndef INFO_PRODUCTNAME
     !define INFO_PRODUCTNAME "whatisthis"
@@ -17,7 +17,7 @@
     !define INFO_PRODUCTVERSION "1.0.0"
 !endif
 !ifndef INFO_COPYRIGHT
-    !define INFO_COPYRIGHT "Copyright........."
+    !define INFO_COPYRIGHT "guoluwei"
 !endif
 !ifndef PRODUCT_EXECUTABLE
     !define PRODUCT_EXECUTABLE "${INFO_PROJECTNAME}.exe"

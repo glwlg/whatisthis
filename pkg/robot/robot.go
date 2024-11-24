@@ -2,7 +2,6 @@ package robot
 
 import (
 	"fmt"
-	"github.com/atotto/clipboard"
 	"github.com/glwlg/whatisthis/internal/utils"
 	"github.com/go-vgo/robotgo"
 	hook "github.com/robotn/gohook"
@@ -14,6 +13,7 @@ var mouseDrag = false
 var enable = false
 
 var selectionCallback func(string)
+var copyTextCallback func() (string, error)
 
 // InitGlobalHotkeys 初始化全局热键和划词检测
 func InitGlobalHotkeys() error {
@@ -29,6 +29,12 @@ func InitGlobalHotkeys() error {
 func RegisterSelectionCallback(callback func(string)) {
 	utils.LogInfo("注册划词检测回调")
 	selectionCallback = callback
+}
+
+// RegisterCopyTextCallback 注册复制文本回调函数
+func RegisterCopyTextCallback(callback func() (string, error)) {
+	utils.LogInfo("注册复制文本回调函数")
+	copyTextCallback = callback
 }
 
 func Toggle() bool {
@@ -120,25 +126,16 @@ func executeCallback(e hook.Event) {
 }
 
 func CopyText() (string, error) {
-	err := robotgo.KeyTap("c", "ctrl")
+	err := robotgo.KeyTap("insert", "ctrl")
 	if err != nil {
 		utils.LogError("copy text Error", err)
 		return "", err
 	}
 
-	clipboardText, err := clipboard.ReadAll()
+	clipboardText, err := copyTextCallback()
 	if err != nil {
 		utils.LogError("clipboard  ReadAll Error", err)
 		return "", err
 	}
 	return clipboardText, nil
-}
-
-func WriteToClipboard(text string) error {
-	err := clipboard.WriteAll(text)
-	if err != nil {
-		utils.LogError("clipboard  WriteAll Error", err)
-		return err
-	}
-	return nil
 }

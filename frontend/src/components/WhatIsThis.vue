@@ -1,0 +1,68 @@
+<template>
+  <v-app>
+    <v-main>
+      <v-container class="ma-0 pa-0">
+        <v-row justify="center" align="center">
+          <v-col cols="12" md="6">
+            <v-card id="main-box" class="elevation-12" outlined>
+              <v-card-title style="--wails-draggable: drag">
+              </v-card-title>
+              <v-card-text>
+                <div v-if="data.resultText" class="pa-3">
+                  <div id="result" class="result ma-3" v-text="data.resultText"></div>
+                  <v-btn color="primary" @click="copy">复制</v-btn>
+                </div>
+                <div v-else class="pa-3">
+                  <div id="result" class="result ma-3">请选择文本</div>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
+</template>
+
+<style scoped>
+.result {
+  max-height: 80vh;
+  overflow-y: auto;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 16px;
+}
+#main-box{
+  height: 100vh;
+}
+</style>
+
+<script setup>
+import {onMounted, reactive} from 'vue';
+import {ClipboardSetText, EventsOn} from "../../wailsjs/runtime/runtime.js";
+import router from "../router/index.js";
+
+const data = reactive({
+  resultText: "",
+})
+
+const copy = () => {
+  ClipboardSetText(data.resultText)
+  // WriteToClipboard(data.resultText)
+};
+
+EventsOn("onSearchResult", function (resultText) {
+  data.resultText = resultText
+})
+
+EventsOn("openSetting", function () {
+  goto('config')
+})
+EventsOn("openApiConfig", function () {
+  goto('apiConfig')
+})
+const goto = (path) => {
+  router.push(path);
+};
+</script>

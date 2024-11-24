@@ -45,12 +45,24 @@
                       outlined
                       dense
                   ></v-text-field>
-                  <v-btn color="primary" @click="submit" class="mr-4">Submit</v-btn>
+                  <v-text-field
+                      v-model="delay"
+                      :rules="delayRules"
+                      label="延迟"
+                      required
+                      outlined
+                      dense
+                  ></v-text-field>
+                  <v-btn color="cancel" @click="showSetting=false" class="mr-4">取消</v-btn>
+                  <v-btn color="primary" @click="submit" class="mr-4">保存</v-btn>
                 </v-form>
                 <div v-else>
                   <div v-if="data.resultText" class="pa-3">
                     <div id="result" class="result ma-3" v-text="data.resultText"></div>
-                    <v-btn color="primary" @click="copy">Copy</v-btn>
+                    <v-btn color="primary" @click="copy">复制</v-btn>
+                  </div>
+                  <div v-else class="pa-3">
+                    <div id="result" class="result ma-3">请选择文本</div>
                   </div>
                 </div>
               </v-card-text>
@@ -87,17 +99,20 @@ const data = reactive({
 
 const valid = ref(false);
 const openai = ref({api_key: '', base_url: '', model: '', api_version: ''});
+const delay = ref(1000);
 const apiKeyRules = [v => !!v || 'API Key is required'];
 const baseUrlRules = [v => !!v || 'Base URL is required'];
 const apiVersionRules = [v => !!v || 'API Version is required'];
 const modelRules = [v => !!v || 'Model is required'];
+const delayRules = [v => !!v || v < 200 || '延迟必须大于200ms'];
 
 const showSetting = ref(true);
 
 const submit = () => {
   if (valid.value && openai.value.api_key && openai.value.base_url && openai.value.model && openai.value.api_version) {
     showSetting.value = false;
-    SetConfig({openai: openai.value})
+    SetConfig({openai: openai.value,delay: delay.value}).then(() => {
+      console.log('配置保存成功！');})
   }
 };
 
@@ -110,6 +125,7 @@ onMounted(() => {
     console.log(config);
     if (config.openai) {
       openai.value = config.openai;
+      delay.value = config.delay;
       showSetting.value = false;
     }
   });

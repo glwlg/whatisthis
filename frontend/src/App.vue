@@ -1,9 +1,14 @@
 <script setup>
-import Home from "./components/home.vue";</script>
+import {RouterView} from 'vue-router';
+import StatusBar from "./components/StatusBar.vue";
+
+</script>
 
 <template>
-<!--  <img id="logo" alt="Wails logo" src="./assets/images/logo-universal.png"/>-->
-  <Home/>
+  <v-app>
+    <StatusBar></StatusBar>
+    <RouterView/>
+  </v-app>
 </template>
 
 <style>
@@ -17,5 +22,17 @@ import Home from "./components/home.vue";</script>
   background-repeat: no-repeat;
   background-size: 100% 100%;
   background-origin: content-box;
+}
+
+.v-overlay__scrim {
+  width: 80vw !important;
+  margin-left: 20vw !important;
+}
+
+.unselectable-text {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 </style>
