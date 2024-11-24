@@ -48,6 +48,9 @@
             </v-card>
           </v-col>
         </v-row>
+        <v-snackbar ref="snackbar" v-model="snackbarShow" :timeout="3000" color="success">
+          保存成功！
+        </v-snackbar>
       </v-container>
     </v-main>
   </v-app>
@@ -69,6 +72,7 @@ const openai = ref({api_key: '', base_url: '', model: '', api_version: ''});
 const apiKeyRules = [v => !!v || 'API Key is required'];
 const baseUrlRules = [v => !!v || 'Base URL is required'];
 const modelRules = [v => !!v || 'Model is required'];
+const snackbarShow = ref(false);
 
 
 const submit = () => {
@@ -76,6 +80,7 @@ const submit = () => {
     console.log({openai: openai.value});
     SetConfig({openai: openai.value});
     console.log('配置保存成功！');
+    snackbarShow.value = true;
   }
 };
 

@@ -1,1 +1,1 @@
-wails build -nsis -upx -clean -debug -devtools
+wails build -nsis -upx -clean

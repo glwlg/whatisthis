@@ -31,6 +31,9 @@
             </v-card>
           </v-col>
         </v-row>
+        <v-snackbar ref="snackbar" v-model="snackbarShow" :timeout="3000" color="success">
+          保存成功！
+        </v-snackbar>
       </v-container>
     </v-main>
   </v-app>
@@ -52,12 +55,14 @@ const valid = ref(false);
 const delay = ref(1000);
 const delayRules = [v => !!v || v < 200 || '延迟必须大于200ms'];
 const robotEnable = ref(false);
+const snackbarShow = ref(false);
 
 const submit = () => {
   if (delay.value) {
     console.log({delay: delay.value});
     SetConfig({delay: delay.value});
     console.log('配置保存成功！');
+    snackbarShow.value = true;
   }
 };
 

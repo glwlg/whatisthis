@@ -11,7 +11,6 @@ require (
 	github.com/sashabaranov/go-openai v1.26.1
 	github.com/spf13/viper v1.19.0
 	github.com/wailsapp/wails/v2 v2.9.2
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

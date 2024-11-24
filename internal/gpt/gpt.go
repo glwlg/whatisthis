@@ -2,9 +2,12 @@ package gpt
 
 import (
 	"context"
+	"errors"
 	"github.com/glwlg/whatisthis/internal/config"
 	"github.com/glwlg/whatisthis/internal/utils"
 	openai "github.com/sashabaranov/go-openai"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"io"
 )
 
 type Gpt struct {
@@ -58,4 +61,53 @@ func (g *Gpt) Search(msg string) (string, error) {
 
 	utils.LogInfo(resp.Choices[0].Message.Content)
 	return resp.Choices[0].Message.Content, nil
+}
+
+func (g *Gpt) SearchStream(ctx context.Context, msg string) {
+	if g.mock {
+		runtime.EventsEmit(ctx, "onSearchResult", msg)
+		return
+	}
+	stream, err := g.client.CreateChatCompletionStream(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: g.model,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleSystem,
+					Content: g.promptTemplate,
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: msg,
+				},
+			},
+			Stream: true,
+		},
+	)
+	if err != nil {
+		utils.LogError("ChatCompletionStream error: %v\n", err)
+		return
+	}
+	defer stream.Close()
+
+	for {
+		var response openai.ChatCompletionStreamResponse
+		response, err = stream.Recv()
+		if errors.Is(err, io.EOF) {
+			utils.LogInfo("\nStream finished")
+			runtime.EventsEmit(ctx, "onSearchResultStreamEnd", "")
+			return
+		}
+
+		if err != nil {
+			utils.LogError("\nStream error: %v\n", err)
+			runtime.EventsEmit(ctx, "onSearchResultStreamEnd", "error")
+			return
+		}
+
+		runtime.EventsEmit(ctx, "onSearchResultStream", response.Choices[0].Delta.Content)
+
+		//fmt.Println(response.Choices[0].Delta.Content)
+	}
 }

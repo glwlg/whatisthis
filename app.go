@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"context"
+	_ "embed"
 	"fmt"
 	"github.com/energye/systray"
 	"github.com/glwlg/whatisthis/internal/config"
@@ -11,9 +11,14 @@ import (
 	"github.com/glwlg/whatisthis/internal/utils"
 	"github.com/glwlg/whatisthis/pkg/robot"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"io"
 	"os"
 )
+
+//go:embed configs/config.yaml
+var configData []byte
+
+//go:embed public/icon.ico
+var icon []byte
 
 // App struct
 type App struct {
@@ -33,7 +38,7 @@ func NewApp() *App {
 		utils.LogError("无法初始化配置: %v", err)
 	}
 	// 初始化配置
-	config.InitConfig()
+	config.InitConfig(configData)
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		utils.LogError("无法加载配置文件: %v", err)
@@ -48,22 +53,7 @@ func NewApp() *App {
 }
 
 func (a *App) systemTray() {
-	file, err := os.Open("./icon.ico")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	// 创建一个缓冲区读取器
-	reader := bufio.NewReader(file)
-
-	// 读取整个文件到 byte 数组
-	icoByte, err := io.ReadAll(reader)
-	if err != nil {
-		panic(err)
-	}
-
-	systray.SetIcon(icoByte) // read the icon from a file
+	systray.SetIcon(icon) // read the icon from a file
 
 	show := systray.AddMenuItem("打开", "打开面板")
 	toggle := systray.AddMenuItem(robot.MenuTitle(), "开启/关闭划词")
@@ -132,17 +122,21 @@ func (a *App) startup(ctx context.Context) {
 		}
 		lastSearchText = selectedText
 
-		result, err := gptClient.Search(selectedText)
-		if err != nil {
-			utils.LogError("搜索出错: ", err)
-			return
-		}
-
-		resultText = result
-
-		runtime.EventsEmit(a.ctx, "onSearchResult", resultText)
-
+		runtime.EventsEmit(ctx, "goto", "/")
 		a.showWindow()
+
+		utils.LogInfo("selectedText: " + selectedText)
+		gptClient.SearchStream(a.ctx, selectedText)
+
+		//result, err := gptClient.Search(selectedText)
+		//if err != nil {
+		//	utils.LogError("搜索出错: ", err)
+		//	return
+		//}
+		//
+		//resultText = result
+		//
+		//runtime.EventsEmit(a.ctx, "onSearchResult", resultText)
 
 	})
 	robot.RegisterCopyTextCallback(func() (string, error) {

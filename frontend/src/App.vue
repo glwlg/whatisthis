@@ -1,6 +1,12 @@
 <script setup>
 import {RouterView} from 'vue-router';
 import StatusBar from "./components/StatusBar.vue";
+import {EventsOn} from "../wailsjs/runtime/runtime.js";
+import router from "./router/index.js";
+
+EventsOn("goto", function (path) {
+  router.push(path);
+})
 
 </script>
 

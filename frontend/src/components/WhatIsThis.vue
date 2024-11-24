@@ -19,6 +19,9 @@
             </v-card>
           </v-col>
         </v-row>
+        <v-snackbar ref="snackbar" v-model="snackbarShow" :timeout="3000" color="success">
+          复制成功！
+        </v-snackbar>
       </v-container>
     </v-main>
   </v-app>
@@ -27,33 +30,48 @@
 <style scoped>
 .result {
   max-height: 80vh;
+  min-height: 40vh;
   overflow-y: auto;
   background-color: #f1f1f1;
   border-radius: 8px;
   padding: 10px;
   font-size: 16px;
 }
-#main-box{
+
+#main-box {
   height: 100vh;
 }
 </style>
 
 <script setup>
-import {onMounted, reactive} from 'vue';
+import {reactive, ref} from 'vue';
 import {ClipboardSetText, EventsOn} from "../../wailsjs/runtime/runtime.js";
 import router from "../router/index.js";
 
 const data = reactive({
   resultText: "",
 })
+const streamEnd = ref(true);
+const snackbarShow = ref(false);
 
 const copy = () => {
   ClipboardSetText(data.resultText)
-  // WriteToClipboard(data.resultText)
+  snackbarShow.value = true;
 };
 
 EventsOn("onSearchResult", function (resultText) {
   data.resultText = resultText
+})
+
+EventsOn("onSearchResultStream", function (resultText) {
+  if (streamEnd.value) {
+    data.resultText = "";
+    streamEnd.value = false;
+  }
+  data.resultText += resultText;
+})
+EventsOn("onSearchResultStreamEnd", function (resultText) {
+  streamEnd.value = true;
 })
 
 EventsOn("openSetting", function () {
