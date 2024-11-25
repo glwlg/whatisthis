@@ -1,59 +1,30 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container class="ma-0 pa-0">
-        <v-row justify="center" align="center">
-          <v-col cols="12" md="6">
-            <v-card id="main-box" class="elevation-12" outlined>
-              <v-card-title style="--wails-draggable: drag">
-                <span class="headline">API 设置</span>
-              </v-card-title>
-              <v-card-text>
-                <v-form v-model="valid" ref="form" lazy-validation>
-                  <v-text-field
-                      v-model="openai.api_key"
-                      :rules="apiKeyRules"
-                      label="API Key"
-                      required
-                      outlined
-                      dense
-                  ></v-text-field>
-                  <v-text-field
-                      v-model="openai.base_url"
-                      :rules="baseUrlRules"
-                      label="Base URL"
-                      required
-                      outlined
-                      dense
-                  ></v-text-field>
-                  <v-text-field
-                      v-model="openai.model"
-                      :rules="modelRules"
-                      label="模型"
-                      required
-                      outlined
-                      dense
-                  ></v-text-field>
-                  <v-text-field
-                      v-model="openai.api_version"
-                      label="API Version"
-                      required
-                      outlined
-                      dense
-                  ></v-text-field>
-                  <v-btn color="cancel" @click="gotoWhatIsThisPage" class="mr-4">取消</v-btn>
-                  <v-btn color="primary" @click="submit" class="mr-4">保存</v-btn>
-                </v-form>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-snackbar ref="snackbar" v-model="snackbarShow" :timeout="3000" color="success">
-          保存成功！
-        </v-snackbar>
-      </v-container>
-    </v-main>
-  </v-app>
+  <n-config-provider>
+    <n-layout>
+      <n-space vertical>
+        <n-card id="main-box" title="API 设置">
+          <n-form ref="form" :model="openai" :rules="rules">
+            <n-form-item label="API Key" path="api_key">
+              <n-input v-model:value="openai.api_key" placeholder="请输入"/>
+            </n-form-item>
+            <n-form-item label="Base URL" path="base_url">
+              <n-input v-model:value="openai.base_url" placeholder="请输入"/>
+            </n-form-item>
+            <n-form-item label="模型" path="model">
+              <n-input v-model:value="openai.model" placeholder="请输入"/>
+            </n-form-item>
+            <n-form-item label="API Version">
+              <n-input v-model:value="openai.api_version" placeholder="请输入"/>
+            </n-form-item>
+            <n-space justify="center">
+              <n-button @click="gotoWhatIsThisPage">取消</n-button>
+              <n-button type="primary" @click="submit">保存</n-button>
+            </n-space>
+          </n-form>
+        </n-card>
+      </n-space>
+    </n-layout>
+  </n-config-provider>
 </template>
 
 <style scoped>
@@ -65,22 +36,39 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import {GetConfig, SetConfig} from "../../wailsjs/go/main/App.js";
-import router from "../router/index.js"; // 引入路由实例
+import router from "../router/index.js";
+import {NButton, NCard, NConfigProvider, NForm, NFormItem, NInput, NLayout, NSpace, useMessage} from 'naive-ui';
 
-const valid = ref(false);
-const openai = ref({api_key: '', base_url: '', model: '', api_version: ''});
-const apiKeyRules = [v => !!v || 'API Key is required'];
-const baseUrlRules = [v => !!v || 'Base URL is required'];
-const modelRules = [v => !!v || 'Model is required'];
-const snackbarShow = ref(false);
+const rules = ref({
+  api_key: [{
+    required: true,
+    trigger: ['input', 'blur'],
+    message: '请输入API Key'
+  }],
+  base_url: {
+    required: true,
+    trigger: ['input', 'blur'],
+    message: '请输入Base URL'
+  },
+  model: {
+    required: true,
+    trigger: ['input', 'blur'],
+    message: '请输入模型名称'
+  }
+});
+const message = useMessage();
 
+const openai = ref({
+  api_key: '',
+  base_url: '',
+  model: '',
+  api_version: ''
+});
 
 const submit = () => {
-  if (valid.value && openai.value.api_key && openai.value.base_url && openai.value.model) {
-    console.log({openai: openai.value});
+  if (openai.value.api_key && openai.value.base_url && openai.value.model) {
     SetConfig({openai: openai.value});
-    console.log('配置保存成功！');
-    snackbarShow.value = true;
+    message.success('保存成功！');
   }
 };
 
@@ -95,6 +83,5 @@ onMounted(() => {
       openai.value = config.openai;
     }
   });
-
 });
 </script>

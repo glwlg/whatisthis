@@ -4,6 +4,8 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"os"
+
 	"github.com/energye/systray"
 	"github.com/glwlg/whatisthis/internal/config"
 	"github.com/glwlg/whatisthis/internal/gpt"
@@ -11,7 +13,6 @@ import (
 	"github.com/glwlg/whatisthis/internal/utils"
 	"github.com/glwlg/whatisthis/pkg/robot"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"os"
 )
 
 //go:embed configs/config.yaml

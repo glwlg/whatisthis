@@ -1,42 +1,37 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container class="ma-0 pa-0">
-        <v-row justify="center" align="center">
-          <v-col cols="12" md="6">
-            <v-card id="main-box" class="elevation-12" outlined>
-              <v-card-title style="--wails-draggable: drag">
-                <span class="headline">应用设置</span>
-              </v-card-title>
-              <v-card-text>
-                <v-form v-model="valid" ref="form" lazy-validation>
-                  <v-switch
-                      :model-value="robotEnable"
-                      color="primary"
-                      label="开启划词"
-                      @change="robotToggle"
-                  ></v-switch>
-                  <v-text-field
-                      v-model="delay"
-                      :rules="delayRules"
-                      label="划词延迟"
-                      required
-                      outlined
-                      dense
-                  ></v-text-field>
-                  <v-btn color="cancel" @click="gotoWhatIsThisPage" class="mr-4">取消</v-btn>
-                  <v-btn color="primary" @click="submit" class="mr-4">保存</v-btn>
-                </v-form>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-snackbar ref="snackbar" v-model="snackbarShow" :timeout="3000" color="success">
-          保存成功！
-        </v-snackbar>
-      </v-container>
-    </v-main>
-  </v-app>
+  <n-config-provider>
+    <n-layout>
+      <n-space vertical>
+        <n-card id="main-box" title="应用设置">
+          <n-switch v-model:value="robotEnable" @update:value="robotToggle">
+            <template #checked>
+              划词已启用
+            </template>
+            <template #unchecked>
+              划词已禁用
+            </template>
+          </n-switch>
+          <n-form ref="form" :model="formValue">
+            <n-form-item label="划词延迟">
+              <n-input-number v-model:value="delay"
+                              :min="200"
+                              :max="10000"
+                              placeholder="请输入"
+                              style="width: 100%">
+                <template #suffix>
+                  ms
+                </template>
+              </n-input-number>
+            </n-form-item>
+            <n-space justify="center">
+              <n-button @click="gotoWhatIsThisPage">取消</n-button>
+              <n-button type="primary" @click="submit">保存</n-button>
+            </n-space>
+          </n-form>
+        </n-card>
+      </n-space>
+    </n-layout>
+  </n-config-provider>
 </template>
 
 <style scoped>
@@ -49,20 +44,31 @@
 import {onMounted, ref} from 'vue';
 import {GetConfig, RobotEnable, RobotToggle, SetConfig} from "../../wailsjs/go/main/App.js";
 import router from "../router/index.js";
-import {EventsOn} from "../../wailsjs/runtime/runtime.js"; // 引入路由实例
+import {
+  NButton,
+  NCard,
+  NConfigProvider,
+  NForm,
+  NFormItem,
+  NInputNumber,
+  NLayout,
+  NSpace,
+  NSwitch,
+  useMessage
+} from 'naive-ui';
 
-const valid = ref(false);
 const delay = ref(1000);
-const delayRules = [v => !!v || v < 200 || '延迟必须大于200ms'];
 const robotEnable = ref(false);
-const snackbarShow = ref(false);
+const formValue = ref({});
+const message = useMessage();
 
 const submit = () => {
   if (delay.value) {
     console.log({delay: delay.value});
-    SetConfig({delay: delay.value});
-    console.log('配置保存成功！');
-    snackbarShow.value = true;
+    SetConfig({delay: delay.value.toString()}).then(() => {
+      console.log('配置保存成功！');
+      message.success('保存成功！');
+    })
   }
 };
 
@@ -78,25 +84,16 @@ const gotoWhatIsThisPage = () => {
   router.push('/');
 };
 
-EventsOn("robotToggle", function () {
-  console.log("robotToggle");
-  RobotEnable().then(enable => {
-    console.log(enable);
-    robotEnable.value = enable;
-  });
-})
-
 onMounted(() => {
   RobotEnable().then(enable => {
     console.log(enable);
     robotEnable.value = enable;
   });
   GetConfig().then(config => {
-    console.log(config);
-    if (delay.value) {
-      delay.value = config.delay;
+    console.log('当前延迟配置：', config.delay);
+    if (config.delay) {
+      delay.value = parseInt(config.delay);
     }
   });
-
 });
 </script>

@@ -1,126 +1,117 @@
 <template>
-  <v-app-bar
-      app
-      color="primary"
-      dense
-      elevation="0"
-      class="status-bar"
-      style="--wails-draggable: drag"
-  >
-    <template v-slot:prepend>
-      <v-btn
-          icon
-          class="menu-icon"
-          @click="toggleMenu"
-      >
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
-      </v-btn>
-    </template>
-    <v-toolbar-title @dblclick="toggleMaximizeWindow" class="unselectable-text">这是什么？</v-toolbar-title>
-    <template v-slot:append>
-      <v-btn
-          icon
-          @click="minimizeWindow"
-      >
-        <v-icon icon="mdi-window-minimize"></v-icon>
-      </v-btn>
-      <v-btn
-          icon
-          @click="toggleMaximizeWindow"
-      >
-        <v-icon :icon="isMaximized? 'mdi-window-restore' : 'mdi-window-maximize'"></v-icon>
-      </v-btn>
-      <v-btn
-          icon
-          @click="closeWindow"
-      >
-        <v-icon>mdi-window-close</v-icon>
-      </v-btn>
-    </template>
-  </v-app-bar>
+  <n-layout-header bordered class="status-bar" style="--wails-draggable: drag">
+    <n-space justify="space-between" align="center">
+      <n-space align="center">
+        <n-button quaternary circle @click="toggleMenu">
+          <template #icon>
+            <n-icon color="#fff"><MenuIcon /></n-icon>
+          </template>
+        </n-button>
+        <span class="unselectable-text" @dblclick="toggleMaximizeWindow">这是什么？</span>
+      </n-space>
+      
+      <n-space>
+        <n-button quaternary circle @click="minimizeWindow">
+          <template #icon>
+            <n-icon color="#fff"><MinimizeIcon /></n-icon>
+          </template>
+        </n-button>
+        <n-button quaternary circle @click="toggleMaximizeWindow">
+          <template #icon>
+            <n-icon color="#fff">
+              <MaximizeIcon v-if="!isMaximized" />
+              <RestoreIcon v-else />
+            </n-icon>
+          </template>
+        </n-button>
+        <n-button quaternary circle @click="closeWindow">
+          <template #icon>
+            <n-icon color="#fff"><CloseIcon /></n-icon>
+          </template>
+        </n-button>
+      </n-space>
+    </n-space>
+  </n-layout-header>
 
-  <!-- 在这里添加菜单的显示区域 -->
-  <div v-if="menuVisible" class="menu-container" transition="scroll-x-transition">
-    <v-list>
-      <v-list-item>
-        <v-list-item-title @click="goto('config')" v-text="'应用配置'"></v-list-item-title>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-title @click="goto('apiConfig')" v-text="'API配置'"></v-list-item-title>
-      </v-list-item>
-    </v-list>
-  </div>
-  <v-overlay v-model="menuVisible" @click="toggleMenu" />
+  <n-drawer v-model:show="menuVisible" :width="200" placement="left">
+    <n-space vertical style="padding-top: 48px">
+      <n-menu :options="menuOptions" @update:value="handleMenuSelect" />
+    </n-space>
+  </n-drawer>
 </template>
 
-<script>
-import { defineComponent, ref } from 'vue';
+<script setup>
+import { ref } from 'vue';
+import { WindowMinimise, WindowToggleMaximise, WindowHide } from '../../wailsjs/runtime/runtime.js';
 import router from "../router/index.js";
-import {WindowHide, WindowMinimise, WindowToggleMaximise} from "../../wailsjs/runtime/runtime.js";
+import {
+  NLayoutHeader,
+  NSpace,
+  NButton,
+  NIcon,
+  NDrawer,
+  NMenu
+} from 'naive-ui';
+import {
+  MenuOutline as MenuIcon,
+  RemoveOutline as MinimizeIcon,
+  SquareOutline as MaximizeIcon,
+  ContractOutline as RestoreIcon,
+  CloseOutline as CloseIcon
+} from '@vicons/ionicons5';
 
-export default defineComponent({
-  setup() {
-    const isMaximized = ref(false);
-    const menuVisible = ref(false); // 新增：用于控制菜单的显示状态
+const menuVisible = ref(false);
+const isMaximized = ref(false);
 
-    const toggleMenu = () => {
-      console.log('toggleMenu');
-      menuVisible.value = !menuVisible.value;
-    };
-    const goto = (path) => {
-      toggleMenu();
-      router.push(path);
-    };
-
-    const minimizeWindow = () => {
-      console.log('窗口最小化');
-      WindowMinimise();
-    };
-
-    const toggleMaximizeWindow = () => {
-      WindowToggleMaximise();
-      if (isMaximized.value) {
-        console.log('窗口恢复');
-      } else {
-        console.log('窗口最大化');
-      }
-      isMaximized.value =!isMaximized.value;
-    };
-
-    const closeWindow = () => {
-      console.log('窗口关闭');
-      WindowHide();
-    };
-
-    return {
-      goto,
-      toggleMenu,
-      minimizeWindow,
-      toggleMaximizeWindow,
-      closeWindow,
-      isMaximized,
-      menuVisible // 新增：将菜单显示状态暴露给模板
-    };
+const menuOptions = [
+  {
+    label: '应用配置',
+    key: 'config'
+  },
+  {
+    label: 'API配置',
+    key: 'apiConfig'
   }
-});
+];
+
+const handleMenuSelect = (key) => {
+  console.log('handleMenuSelect');
+  goto(key);
+  menuVisible.value = false;
+};
+
+const goto = (path) => {
+  router.push('/' + path);
+};
+
+const toggleMenu = () => {
+  menuVisible.value = !menuVisible.value;
+};
+
+const minimizeWindow = () => {
+  WindowMinimise();
+};
+
+const toggleMaximizeWindow = () => {
+  WindowToggleMaximise();
+  isMaximized.value = !isMaximized.value;
+};
+
+const closeWindow = () => {
+  WindowHide();
+};
 </script>
 
 <style scoped>
 .status-bar {
-  position: relative!important;
-  z-index: 1000;
+  height: 32px;
+  padding: 0 10px;
+  /* background: rgb(var(--primary-color)); */
+  color: white;
 }
 
-.menu-container {
-  position: absolute;
-  padding-top: 8vh;
-  top: 0;
-  left: 0;
-  width: 20vw;
-  min-width: 100px;
-  height: 100vh;
-  background-color: #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 999;
+.unselectable-text {
+  user-select: none;
+  cursor: default;
 }
 </style>

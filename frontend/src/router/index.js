@@ -1,23 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Config from '../components/Config.vue';
-import WhatIsThis from '../components/WhatIsThis.vue';
-import APIConfig from '../components/APIConfig.vue';
 
 const routes = [
     {
         path: '/',
         name: 'WhatIsThis',
-        component: WhatIsThis,
+        component: () => import('../components/WhatIsThis.vue')
     },
     {
         path: '/config',
         name: 'Config',
-        component: Config,
+        component: () => import('../components/Config.vue')
     },
     {
         path: '/apiConfig',
         name: 'APIConfig',
-        component: APIConfig,
+        component: () => import('../components/APIConfig.vue')
     },
 ];
 

@@ -1,67 +1,78 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container class="ma-0 pa-0">
-        <v-row justify="center" align="center">
-          <v-col cols="12" md="6">
-            <v-card id="main-box" class="elevation-12" outlined>
-              <v-card-title style="--wails-draggable: drag">
-              </v-card-title>
-              <v-card-text>
-                <div v-if="data.resultText" class="pa-3">
-                  <div id="result" class="result ma-3" v-text="data.resultText"></div>
-                  <v-btn color="primary" @click="copy">复制</v-btn>
-                </div>
-                <div v-else class="pa-3">
-                  <div id="result" class="result ma-3">请选择文本</div>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-snackbar ref="snackbar" v-model="snackbarShow" :timeout="3000" color="success">
-          复制成功！
-        </v-snackbar>
-      </v-container>
-    </v-main>
-  </v-app>
+  <n-layout>
+    <n-space vertical size="large" style="max-width: 90%; margin: 0 auto;">
+      <n-card id="main-box">
+        <template #default>
+          <n-space vertical>
+            <div class="result-container">
+              <n-text v-if="data.resultText" class="result">
+                {{ data.resultText }}
+              </n-text>
+              <n-text v-else>
+                请选择文本
+              </n-text>
+            </div>
+            <n-divider v-if="data.resultText"/>
+            <n-space v-if="data.resultText" justify="center">
+              <n-button type="primary" @click="copy">
+                <template #icon>
+                  <n-icon>
+                    <CopyOutline/>
+                  </n-icon>
+                </template>
+                复制
+              </n-button>
+            </n-space>
+          </n-space>
+        </template>
+      </n-card>
+    </n-space>
+  </n-layout>
 </template>
 
 <style scoped>
-.result {
-  max-height: 80vh;
-  min-height: 40vh;
+.result-container {
+  height: calc(90vh - 180px);
   overflow-y: auto;
-  background-color: #f1f1f1;
-  border-radius: 8px;
-  padding: 10px;
+  padding: 16px;
+}
+
+.result {
   font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 #main-box {
-  height: 100vh;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  height: 90vh;
 }
 </style>
 
 <script setup>
 import {reactive, ref} from 'vue';
 import {ClipboardSetText, EventsOn} from "../../wailsjs/runtime/runtime.js";
+import {CopyOutline} from '@vicons/ionicons5';
+import {NButton, NCard, NDivider, NIcon, NLayout, NSpace, NText, useMessage} from 'naive-ui';
 import router from "../router/index.js";
 
+const message = useMessage();
 const data = reactive({
-  resultText: "",
-})
-const streamEnd = ref(true);
-const snackbarShow = ref(false);
+  resultText: ''
+});
 
 const copy = () => {
-  ClipboardSetText(data.resultText)
-  snackbarShow.value = true;
+  if (data.resultText) {
+    ClipboardSetText(data.resultText);
+    message.success('复制成功！');
+  }
 };
 
 EventsOn("onSearchResult", function (resultText) {
-  data.resultText = resultText
-})
+  data.resultText = resultText;
+});
 
 EventsOn("onSearchResultStream", function (resultText) {
   if (streamEnd.value) {
@@ -81,6 +92,7 @@ EventsOn("openApiConfig", function () {
   goto('apiConfig')
 })
 const goto = (path) => {
-  router.push(path);
+  router.push('/' + path);
 };
+const streamEnd = ref(true);
 </script>

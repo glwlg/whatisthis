@@ -7,13 +7,13 @@
   "frontend:dev:watcher": "pnpm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "guoluwei",
+    "name": "glwlg",
     "email": "651971564@qq.com"
   },
   "info": {
-    "companyName": "guoluwei",
+    "companyName": "glwlg",
     "productName": "whatisthis",
     "productVersion": "1.0.0",
-    "copyright": "guoluwei"
+    "copyright": "glwlg"
   }
 }
